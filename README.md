@@ -4,9 +4,9 @@
 | Module / Tool | Status |
 | - | :-: |
 | Modern Logging (logging, rich)     | ✅ |
-| Web Scraping                     |        |
+| Web Scraping                     |✅|
 | Web Interface (Streamlit)        |        |
 | Data Validation (Pydantic)       |        |
 | Orchestration (Prefect)          |        |
-
+| Database(lakeFS) | |
 
