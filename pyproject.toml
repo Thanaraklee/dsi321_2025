@@ -1,0 +1,7 @@
+[project]
+name = "dsi321_2025"
+version = "1.0.0"
+
+
+[tool.setuptools.packages.find]
+where = ["."]
