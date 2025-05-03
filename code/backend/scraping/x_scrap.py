@@ -50,7 +50,7 @@ def scrape_all_tweet_texts(url: str, max_scrolls: int = 5):
                     logger.error("Initial tweet text found.")
                 except Exception as e2:
                     logger.error("Could not find initial tweet text either", exc_info=True)
-                    page.screenshot(path="debug_screenshot_no_tweets.png")
+                    page.screenshot(path="tmp/debug_screenshot_no_tweets.png")
                     return all_tweet_entries
 
             logger.debug(f"Scrolling down {max_scrolls} times...")
@@ -121,10 +121,10 @@ def scrape_tag(tag:str) -> pd.DataFrame:
     tweet_data = scrape_all_tweet_texts(target_url, max_scrolls=1)
 
 
-    logger.debug("\n--- Scraped Tweet Data ---")
+    # logger.debug("\n--- Scraped Tweet Data ---")
     if tweet_data:
-        pprint(tweet_data)
-        logger.info(f"\nTotal unique tweet entries scraped: {len(tweet_data)}")
+        # pprint(tweet_data)
+        logger.info(f"Total unique tweet entries scraped: {len(tweet_data)}")
     else:
         logger.info("No tweet texts were scraped.")
     
