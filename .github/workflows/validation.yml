@@ -1,5 +1,4 @@
-name: Update README with Validation Report
-
+name: Validation
 on:
   workflow_dispatch:
 
