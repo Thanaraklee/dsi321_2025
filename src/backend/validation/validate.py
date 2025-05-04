@@ -2,7 +2,8 @@ from typing import Optional
 from pydantic import BaseModel, validator, ValidationError
 from datetime import datetime
 import pandas as pd
-
+from rich.panel import Panel
+from rich.console import Console
 # Import logging configuration
 from config.logging.modern_log import LoggingConfig
 
@@ -40,9 +41,33 @@ class TweetData(BaseModel):
 class ValidationPydantic:
     def __init__(self, model: type[BaseModel]):
         self.model = model
+        self.console = Console()
 
     def validate(self, df: pd.DataFrame) -> bool:
-        all_valid = True 
+        all_valid = True
+
+        # Validation
+        dataset_checks = {
+            f"Record Count (≥1000) records: {len(df)}": len(df) >= 1000,
+            f"Time Span (≥24 hours) min: {pd.to_datetime(df['postTime']).min()} max: {pd.to_datetime(df['postTime']).max()}": self._check_time_span(df),
+            f"No Missing Values missing: {df.isnull().sum().sum()}": df.isnull().sum().sum() == 0,
+            f"No 'object' dtype columns columns: {', '.join(f'{k}: {v}' for k, v in df.dtypes.items() if v == 'object')}": not any(df.dtypes == 'object'),
+            f"No Duplicate Rows duplicates: {df.duplicated().sum()}": df.duplicated().sum() == 0,
+        }
+
+        failed_checks = [k for k, v in dataset_checks.items() if not v]
+        if failed_checks:
+            all_valid = False
+            panel_content = "\n".join(f"[bold red]✘[/bold red] {k}" if not v else f"[green]✔ {k}[/green]" 
+                                      for k, v in dataset_checks.items())
+            panel = Panel(panel_content, title="Dataset Validation Summary", border_style="bold red")
+            self.console.print(panel)
+            logger.error("Dataset-level validation failed.")
+            return False
+        else:
+            panel_content = "\n".join(f"[green]✔ {k}[/green]" for k in dataset_checks)
+            panel = Panel(panel_content, title="Dataset Validation Summary", border_style="bold green")
+            self.console.print(panel)
 
         for idx, row in df.iterrows():
             data_dict = row.to_dict()
@@ -54,3 +79,14 @@ class ValidationPydantic:
                 logger.error(e.json(indent=2))
 
         return all_valid
+
+    def _check_time_span(self, df: pd.DataFrame) -> bool:
+        if 'postTime' not in df.columns:
+            return False
+        try:
+            min_time = pd.to_datetime(df['postTime']).min()
+            max_time = pd.to_datetime(df['postTime']).max()
+            return (max_time - min_time) >= pd.Timedelta(hours=24)
+        except Exception as e:
+            logger.error(f"Time span check failed: {e}")
+            return False

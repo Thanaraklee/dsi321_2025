@@ -147,6 +147,7 @@ def scrape_tag(tag:str) -> pd.DataFrame:
     
     try:
         tweet_df = pd.DataFrame(tweet_data)
+        # Fix Data Types
         tweet_df['scrapeTime'] = datetime.now()
         
         clean_tag = lambda x: re.sub(r'[^a-zA-Z0-9ก-๙]', '', x)
@@ -156,7 +157,13 @@ def scrape_tag(tag:str) -> pd.DataFrame:
         tweet_df['postTimeRaw'] = tweet_df['username'].str.split("·").str[-1].str.split(",").str[0]
 
         tweet_df['postTime'] = tweet_df.apply(lambda x: transform_post_time(x['postTimeRaw'], x['scrapeTime']), axis=1)
-        scrape_time = datetime.now().strftime('%Y-%m-%d_%H-%M') # 
+
+        tweet_df['username'] = tweet_df['username'].astype('string')
+        tweet_df['tweetText'] = tweet_df['tweetText'].astype('string')
+        tweet_df['tag'] = tweet_df['tag'].astype('string')
+        tweet_df['postTimeRaw'] = pd.to_datetime(tweet_df['postTimeRaw'], format='%b %d')
+
+        # scrape_time = datetime.now().strftime('%Y-%m-%d_%H-%M') # 
     except Exception as e:
         logger.error("Error creating DataFrame", exc_info=True)
         return
@@ -190,16 +197,6 @@ if __name__ == "__main__":
         is_valid = validator.validate(data)
 
         if is_valid:
-            # Display panel with validation Rules 
-            validate_rules = {}
-            for field_name, field_info in TweetData.model_fields.items():
-                validate_rules[field_name] = field_info.annotation.__name__
-            
-            logger.info("All data passed validation:")
-            panel_content = json.dumps(validate_rules, indent=2)
-            panel = Panel(panel_content, title="Validation Rules", border_style="bold blue", highlight=True, width=80)
-            console.print(panel, justify="left")
-
             # Save the data to Parquet in LakeFS
             save_to_parquet(data)
         else:
