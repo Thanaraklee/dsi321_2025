@@ -68,7 +68,7 @@ class ValidationPydantic:
             all_valid = False
             panel_content = "\n".join(f"[bold red]✘[/bold red] {k}" if not v else f"[green]✔ {k}[/green]" 
                                       for k, v in dataset_checks.items())
-            with open("src/backend/validation/validateion_report.txt", "w", encoding="utf-8") as f:
+            with open("src/backend/validation/validation_report.txt", "w", encoding="utf-8") as f:
                 f.write(panel_content)
             panel = Panel(panel_content, title="Dataset Validation Summary", border_style="bold red")
             self.console.print(panel)
@@ -76,7 +76,7 @@ class ValidationPydantic:
             return False
         else:
             panel_content = "\n".join(f"[green]✔ {k}[/green]" for k in dataset_checks)
-            with open("src/backend/validation/validateion_report.txt", "w", encoding="utf-8") as f:
+            with open("src/backend/validation/validation_report.txt", "w", encoding="utf-8") as f:
                 f.write(panel_content)
             panel = Panel(panel_content, title="Dataset Validation Summary", border_style="bold green")
             self.console.print(panel)
