@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  update-readme:
+  validation:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
