@@ -1,0 +1,51 @@
+name: Update README with Validation Report
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          pip install pydantic==2.11.4 rich==14.0.0 pandas==2.2.3
+
+      - name: Run validation script
+        run: |
+          python src/backend/validation/validate.py
+
+      - name: Update README with validation report
+        run: |
+          # Read the validation report file and format it into a table
+          validation_report=$(cat src/backend/validation/validation_report.txt)
+          # Convert the validation report into a Markdown table format
+          validation_report_md="| Check | Status |\n|-------|--------|\n"
+          while IFS= read -r line; do
+            if [[ $line == *"✔"* ]]; then
+              validation_report_md+="| $line | ✅ |\n"
+            elif [[ $line == *"✘"* ]]; then
+              validation_report_md+="| $line | ❌ |\n"
+            fi
+          done <<< "$validation_report"
+
+          # Replace the old table with the new one in README.md
+          sed -i '/<!-- validation-report -->/r /dev/stdin' README.md <<< "$validation_report_md"
+
+      - name: Commit and push changes to README.md
+        run: |
+          git config --global user.name "Thanaraklee"
+          git config --global user.email "bzank.lee@hotmail.com"
+          git add README.md
+          git commit -m "UP: Update README with latest validation report"
+          git push

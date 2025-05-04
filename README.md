@@ -14,6 +14,9 @@
 | Web Interface (Streamlit) |        |
 | Orchestration (Prefect) |        |
 
+# Dataset Quality
+<!-- validation-report -->
+
 # Prepare
 1. Create environment
 ```bash

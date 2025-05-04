@@ -7,7 +7,7 @@ aiosignal==1.3.2
 annotated-types==0.7.0
 attrs==25.3.0
 botocore==1.37.3
--e git+https://github.com/Thanaraklee/dsi321_2025.git@6e39dda409611fec321aea89171eaad1dfdf1bc6#egg=dsi321_2025
+-e git+https://github.com/Thanaraklee/dsi321_2025.git@85b99621d90614b2be60cc2c88ce11c2a8ed0b35#egg=dsi321_2025
 frozenlist==1.6.0
 fsspec==2025.3.2
 greenlet==3.2.1
@@ -27,7 +27,6 @@ propcache==0.3.1
 pyarrow==20.0.0
 pydantic==2.11.4
 pydantic_core==2.33.2
-pydentic==0.0.1.dev3
 pyee==13.0.0
 Pygments==2.19.1
 python-dateutil==2.9.0.post0

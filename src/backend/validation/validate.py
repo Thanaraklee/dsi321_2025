@@ -1,5 +1,5 @@
 from typing import Optional
-from pydantic import BaseModel, validator, ValidationError
+from pydantic import BaseModel, field_validator, ValidationError
 from datetime import datetime
 import pandas as pd
 from rich.panel import Panel
@@ -20,19 +20,19 @@ class TweetData(BaseModel):
     month: int
     day: int
 
-    @validator('postTime')
+    @field_validator('postTime')
     def validate_post_time(cls, v):
         if v.year < 2020 or v > datetime.now():
             raise ValueError("postTime is out of valid range")
         return v
 
-    @validator('month')
+    @field_validator('month')
     def validate_month(cls, v):
         if not 1 <= v <= 12:
             raise ValueError("month must be between 1 and 12")
         return v
 
-    @validator('day')
+    @field_validator('day')
     def validate_day(cls, v):
         if not 1 <= v <= 31:
             raise ValueError("day must be between 1 and 31")
@@ -45,7 +45,15 @@ class ValidationPydantic:
 
     def validate(self, df: pd.DataFrame) -> bool:
         all_valid = True
-
+        for idx, row in df.iterrows():
+            data_dict = row.to_dict()
+            try:
+                self.model(**data_dict)
+            except ValidationError as e:
+                all_valid = False
+                logger.error(f"Validation error in row {idx}:")
+                logger.error(e.json(indent=2))
+        
         # Validation
         dataset_checks = {
             f"Record Count (≥1000) records: {len(df)}": len(df) >= 1000,
@@ -60,24 +68,18 @@ class ValidationPydantic:
             all_valid = False
             panel_content = "\n".join(f"[bold red]✘[/bold red] {k}" if not v else f"[green]✔ {k}[/green]" 
                                       for k, v in dataset_checks.items())
+            with open("src/backend/validation/validateion_report.txt", "w", encoding="utf-8") as f:
+                f.write(panel_content)
             panel = Panel(panel_content, title="Dataset Validation Summary", border_style="bold red")
             self.console.print(panel)
             logger.error("Dataset-level validation failed.")
             return False
         else:
             panel_content = "\n".join(f"[green]✔ {k}[/green]" for k in dataset_checks)
+            with open("src/backend/validation/validateion_report.txt", "w", encoding="utf-8") as f:
+                f.write(panel_content)
             panel = Panel(panel_content, title="Dataset Validation Summary", border_style="bold green")
             self.console.print(panel)
-
-        for idx, row in df.iterrows():
-            data_dict = row.to_dict()
-            try:
-                self.model(**data_dict)
-            except ValidationError as e:
-                all_valid = False
-                logger.error(f"Validation error in row {idx}:")
-                logger.error(e.json(indent=2))
-
         return all_valid
 
     def _check_time_span(self, df: pd.DataFrame) -> bool:
@@ -90,3 +92,9 @@ class ValidationPydantic:
         except Exception as e:
             logger.error(f"Time span check failed: {e}")
             return False
+
+if __name__ == "__main__":
+    # Example usage
+    data = pd.read_csv('data/tweet_data.csv')
+    validator = ValidationPydantic(TweetData)
+    is_valid = validator.validate(data)

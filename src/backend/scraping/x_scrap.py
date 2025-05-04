@@ -196,11 +196,12 @@ if __name__ == "__main__":
         validator = ValidationPydantic(TweetData)
         is_valid = validator.validate(data)
 
-        if is_valid:
+        # if is_valid:
+        data.to_csv('data/tweet_data.csv', index=False)
             # Save the data to Parquet in LakeFS
-            save_to_parquet(data)
-        else:
-            logger.error("Data is not valid according to Pydantic model.")
+        save_to_parquet(data)
+        # else:
+        logger.error("Data is not valid according to Pydantic model.")
     else:
         logger.error("No data to save.")
     
