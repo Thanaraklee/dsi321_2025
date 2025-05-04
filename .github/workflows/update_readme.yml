@@ -1,9 +1,7 @@
 name: Update README with Validation Report
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   update-readme:
