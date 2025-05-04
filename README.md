@@ -16,6 +16,7 @@
 
 # Dataset Quality
 <!-- validation-report -->
+| Check | Status |\n|-------|--------|\n| [bold red]✘[/bold red] Record Count (≥1000) records: 25 | ❌ |\n| [green]✔ Time Span (≥24 hours) min: 2024-10-23 00:00:00 max: 2025-05-01 00:00:00[/green] | ✅ |\n| [green]✔ No Missing Values missing: 0[/green] | ✅ |\n| [bold red]✘[/bold red] No 'object' dtype columns columns: username: object, tweetText: object, scrapeTime: object, tag: object, postTimeRaw: object, postTime: object | ❌ |\n| [green]✔ No Duplicate Rows duplicates: 0[/green] | ✅ |\n
 
 # Prepare
 1. Create environment
