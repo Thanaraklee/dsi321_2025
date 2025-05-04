@@ -8,7 +8,7 @@ DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 
 class LoggingConfig:
     def __init__(self, level: str = "DEBUG", level_console: str = "INFO", log_file: str = None):
-
+        os.makedirs("tmp", exist_ok=True) 
         logger = logging.getLogger()
 
         if log_file is None:
