@@ -1,4 +1,8 @@
 # DSI321
+# CI Status
+|  | |
+| - | :-: |
+| Security | [![Bandit](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/bandit.yml/badge.svg?branch=main)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/bandit.yml) |
 
 # Project Status
 | Module / Tool | Status |
