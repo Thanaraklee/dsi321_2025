@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -31,16 +31,17 @@ jobs:
 
       - name: Update README with validation report
         run: |
-          # Read the validation report file and format it into a table
+          # อ่านรายงาน validation
           validation_report=$(cat src/backend/validation/validation_report.txt)
-          # Convert the validation report into a Markdown table format
-          validation_report_md="| Check | Status |\n|-------|--------|\n"
+
+          # สร้าง Markdown table ด้วย printf เพื่อให้ newline ทำงานได้จริง
+          validation_report_md=$(printf "| Check | Status |\n|-------|--------|\n")
           while IFS= read -r line; do
-            if [[ $line == *"✔"* ]]; then
-              validation_report_md+="| $line | ✅ |\n"
-            elif [[ $line == *"✘"* ]]; then
-              validation_report_md+="| $line | ❌ |\n"
-            fi
+          if [[ $line == *"✔"* ]]; then
+            validation_report_md+=$(printf "| %s | ✅ |\n" "$line")
+          elif [[ $line == *"✘"* ]]; then
+            validation_report_md+=$(printf "| %s | ❌ |\n" "$line")
+          fi
           done <<< "$validation_report"
 
           # Replace the old table with the new one in README.md
