@@ -8,16 +8,20 @@ from pathlib import Path
 import pandas as pd
 import re
 import urllib.parse
+from rich.console import Console
+from rich.panel import Panel
 
 # Import modern logging configuration
 from config.logging.modern_log import LoggingConfig
 # Import path configuration
 from config.path_config import AUTH_TWITTER
-
+# Import LakeFS loader
 from src.backend.load.lakefs_loader import LakeFSLoader
-
+# Import validation configuration
+from src.backend.validation.validate import ValidationPydantic, TweetData
 
 logger = LoggingConfig(level="DEBUG", level_console="DEBUG").get_logger()
+console = Console()
 
 def scrape_all_tweet_texts(url: str, max_scrolls: int = 5):
     """
@@ -109,9 +113,19 @@ def transform_post_time(post_time, scrape_time):
         return scrape_time - pd.Timedelta(seconds=second)
     
     try:
+        month_day = pd.to_datetime(post_time, format='%b %d')
         current_year = scrape_time.year
-        post_time = f"{current_year} {post_time}"
-        return pd.to_datetime(post_time, format='%Y %b %d') # %Y %b %d
+
+        full_date = month_day.replace(year=current_year)
+        # current_year = scrape_time.year
+        # post_time = f"{current_year} {post_time}"
+        if full_date <= scrape_time:
+            return pd.to_datetime(full_date, format='%Y %b %d')
+        else:
+            full_date = full_date.replace(year=current_year - 1)
+            return pd.to_datetime(full_date, format='%Y %b %d')
+        
+        # return pd.to_datetime(post_time, format='%Y %b %d') # %Y %b %d
     except ValueError:
         logger.error(f"Error transforming post_time: {post_time}", exc_info=True)
         return pd.NaT
@@ -169,8 +183,27 @@ def save_to_parquet(data: pd.DataFrame):
 if __name__ == "__main__":
     tag = "#ธรรมศาสตร์ช้างเผือก"
     data = scrape_tag(tag)
+
     if data is not None:
-        save_to_parquet(data)
+        # Validate the data using Pydantic
+        validator = ValidationPydantic(TweetData)
+        is_valid = validator.validate(data)
+
+        if is_valid:
+            # Display panel with validation Rules 
+            validate_rules = {}
+            for field_name, field_info in TweetData.model_fields.items():
+                validate_rules[field_name] = field_info.annotation.__name__
+            
+            logger.info("All data passed validation:")
+            panel_content = json.dumps(validate_rules, indent=2)
+            panel = Panel(panel_content, title="Validation Rules", border_style="bold blue", highlight=True, width=80)
+            console.print(panel, justify="left")
+
+            # Save the data to Parquet in LakeFS
+            save_to_parquet(data)
+        else:
+            logger.error("Data is not valid according to Pydantic model.")
     else:
         logger.error("No data to save.")
     

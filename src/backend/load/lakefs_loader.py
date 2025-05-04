@@ -46,7 +46,7 @@ class LakeFSLoader:
             if start_result.returncode == 0:
                 logger.info(f"Container {container_name} started successfully.")
                 logger.info("Waiting for container to be ready...")
-                time.sleep(10)  # Wait for lakeFS to be ready
+                time.sleep(10)  
             else:
                 logger.error(f"Failed to start container {container_name}. Error: {start_result.stderr.strip()}")
 

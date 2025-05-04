@@ -3,12 +3,12 @@
 # Project Status
 | Module / Tool | Status |
 | - | :-: |
-| Modern Logging (Logging, Rich)     | ✅ |
-| Web Scraping                     |✅|
+| Modern Logging (Logging, Rich) | ✅ |
+| Web Scraping |✅|
 | Database(LakeFS) | ✅ |
-| Web Interface (Streamlit)        |        |
-| Data Validation (Pydantic)       |        |
-| Orchestration (Prefect)          |        |
+| Data Validation (Pydantic) | ✅ |
+| Web Interface (Streamlit) |        |
+| Orchestration (Prefect) |        |
 
 # Prepare
 1. Create environment
