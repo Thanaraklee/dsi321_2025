@@ -1,15 +1,10 @@
 from playwright.sync_api import sync_playwright
 import time
-from pprint import pprint
-import json
-import os
-from datetime import datetime  # <-- NEW IMPORT
-from pathlib import Path
+from datetime import datetime
 import pandas as pd
 import re
 import urllib.parse
 from rich.console import Console
-from rich.panel import Panel
 from rich.prompt import Prompt
 # Import modern logging configuration
 from config.logging.modern_log import LoggingConfig
@@ -23,7 +18,7 @@ from src.backend.validation.validate import ValidationPydantic, TweetData
 logger = LoggingConfig(level="DEBUG", level_console="INFO").get_logger()
 console = Console()
 
-def scrape_all_tweet_texts(url: str, max_scrolls: int = 5):
+def scrape_all_tweet_texts(url: str, max_scrolls: int = 5, view_browser: bool = False) -> list[dict]:
     """
     Scrapes all tweet texts from a given Twitter URL by scrolling down.
 
@@ -38,12 +33,11 @@ def scrape_all_tweet_texts(url: str, max_scrolls: int = 5):
     seen_pairs = set()  # To keep track of unique (username, tweetText)
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
+        browser = p.chromium.launch(headless=view_browser)
         context = browser.new_context(storage_state=AUTH_TWITTER, viewport={"width": 1280, "height": 1024})
         page = context.new_page()
 
         try:
-            # print(f"Navigating to {url}...")
             page.goto(url)
             logger.debug("Page loaded. Waiting for initial tweets...")
 
@@ -106,23 +100,6 @@ def scrape_all_tweet_texts(url: str, max_scrolls: int = 5):
                                     except ValueError as e:
                                         logger.error(f"Invalid datetime format: {dateTime} | Error: {e}", exc_info=True)
 
-                # tweet_elements = page.query_selector_all("[data-testid='tweetText']")
-                # user_names = page.query_selector_all("[data-testid='User-Name']")
-                # now = datetime.now()
-
-                # for user, text in zip(user_names, tweet_elements):
-                #     username = user.text_content()
-                #     tweet_text = text.text_content()
-                    # if username and tweet_text:
-                    #     key = (username, tweet_text)
-                    #     if key not in seen_pairs:
-                    #         seen_pairs.add(key)
-                    #         all_tweet_entries.append({
-                    #             "username": username,
-                    #             "tweetText": tweet_text,
-                    #             "scrapeTime": now.isoformat()
-                    #         })
-
                 logger.info(f"Total tweets collected so far: {len(all_tweet_entries)}")
 
         except Exception as e:
@@ -147,14 +124,14 @@ def transform_post_time(post_time, scrape_time):
 
     return adjusted_time
 
-def scrape_tags(tags: list[str], max_scrolls: int = 2) -> pd.DataFrame:
+def scrape_tags(tags: list[str], max_scrolls: int = 2, view_browser: bool = False) -> pd.DataFrame:
     all_dfs = []
 
     for tag in tags:
         encoded = urllib.parse.quote(tag, safe='')
         target_url = f"https://x.com/search?q={encoded}&src=typeahead_click&f=live"
         
-        tweet_data = scrape_all_tweet_texts(target_url, max_scrolls=max_scrolls)
+        tweet_data = scrape_all_tweet_texts(target_url, max_scrolls=max_scrolls, view_browser=view_browser)
 
         if tweet_data:
             logger.info(f"Total unique tweet entries scraped for tag '{tag}': {len(tweet_data)}")
@@ -202,11 +179,21 @@ def save_to_parquet(data: pd.DataFrame):
 
 if __name__ == "__main__":
     tags = [
-        "#ธรรมศาสตร์ช้างเผือก",
+        # "#ธรรมศาสตร์ช้างเผือก",
+        "#TCAS",
+        # "#รับตรง", 
     ]
-    data = scrape_tags(tags=tags, max_scrolls=1)
-    
-    if data is not None:
+
+    view_browser = Prompt.ask('Do you want to view the browser? (Y = Yes, N = No)', choices=['Y', 'N'])
+    if view_browser == 'Y':
+        view_browser = False
+        logger.info("Browser will be 'visible' during scraping.")
+    else:
+        view_browser = True
+        logger.info("Browser will be 'hidden' during scraping.")
+
+    data = scrape_tags(tags=tags, max_scrolls=20, view_browser=view_browser)
+    if not data.empty:
         # Validate the data using Pydantic
         validator = ValidationPydantic(TweetData)
         is_valid = validator.validate(data)
@@ -215,6 +202,8 @@ if __name__ == "__main__":
         if save_csv == 'Y':
             data.to_csv('data/tweet_data.csv', index=False)
             logger.info("CSV file saved.")
+        else:
+            logger.info("Data not saved to CSV.")
 
         save_parquet = Prompt.ask('Do you want to save the data to Parquet? (Y = Yes, N = No)', choices=['Y', 'N'])
         if save_parquet == 'Y':
