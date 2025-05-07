@@ -14,7 +14,7 @@ class TweetData(BaseModel):
     tweetText: str
     scrapeTime: datetime
     tag: Optional[str]
-    postTimeRaw: str
+    postTimeRaw: datetime
     postTime: datetime
     year: int
     month: int

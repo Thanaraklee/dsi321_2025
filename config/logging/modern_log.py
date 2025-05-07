@@ -16,6 +16,8 @@ class LoggingConfig:
             caller_filename = os.path.basename(caller_frame.filename)
             base_name = os.path.splitext(caller_filename)[0]
             log_file = f"{base_name}.log"
+
+        logger.handlers.clear()
         
         # Console handler
         console_handler = RichHandler(level=level_console, rich_tracebacks=True)
@@ -23,7 +25,7 @@ class LoggingConfig:
 
         # File handler
         file_handler = logging.FileHandler(f"tmp/{log_file}", encoding="utf-8")
-        file_handler.setLevel(logging.WARNING)
+        file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(logging.Formatter(fmt=FORMAT, datefmt=DATE_FORMAT))
 
         if not logger.handlers:

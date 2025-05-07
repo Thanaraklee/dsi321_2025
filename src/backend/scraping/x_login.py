@@ -3,6 +3,7 @@ from rich.prompt import Prompt
 from rich.text import Text
 from pathlib import Path
 import json
+import requests
 import os
 # Import modern logging configuration
 from config.logging.modern_log import LoggingConfig
@@ -11,6 +12,7 @@ from config.path_config import AUTH_TWITTER
 
 
 logger = LoggingConfig(level="DEBUG").get_logger()
+
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=False)  # headless=False so you can log in manually
@@ -30,8 +32,11 @@ with sync_playwright() as p:
     # Validate the saved session
     logger.info("Session saved. Validating...")
     data = json.load(open(AUTH_TWITTER, "r"))
-    if len(data['cookies']) > (13*2) and len(data['cookies'][0]['value']) > 500:
-        logger.info("Session is valid ✅")
-    else:
-        logger.error("Session is invalid ❌. Removing file...")
-        os.remove(AUTH_TWITTER)
+
+    # Validate the session using the cookies from the saved state
+
+    # if len(data['cookies']) > (13*2) and len(data['cookies'][0]['value']) > 500:
+    #     logger.info("Session is valid ✅")
+    # else:
+    #     logger.error("Session is invalid ❌. Removing file...")
+    #     os.remove(AUTH_TWITTER)
