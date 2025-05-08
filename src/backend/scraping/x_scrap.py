@@ -4,6 +4,7 @@ from datetime import datetime
 import pandas as pd
 import re
 import urllib.parse
+import os
 from rich.console import Console
 from rich.prompt import Prompt
 # Import modern logging configuration
@@ -208,6 +209,7 @@ if __name__ == "__main__":
 
         save_csv = Prompt.ask('Do you want to save the data to CSV? (Y = Yes, N = No)', choices=['Y', 'N'])
         if save_csv == 'Y':
+            os.makedirs('data', exist_ok=True)
             data.to_csv('data/tweet_data.csv', index=False)
             logger.info("CSV file saved.")
         else:
