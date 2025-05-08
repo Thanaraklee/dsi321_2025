@@ -15,7 +15,7 @@ from src.backend.load.lakefs_loader import LakeFSLoader
 # Import validation configuration
 from src.backend.validation.validate import ValidationPydantic, TweetData
 
-logger = LoggingConfig(level="DEBUG", level_console="INFO").get_logger()
+logger = LoggingConfig(level="DEBUG", level_console="DEBUG").get_logger()
 console = Console()
 
 def scrape_all_tweet_texts(url: str, max_scrolls: int = 5, view_browser: bool = False) -> list[dict]:
@@ -31,7 +31,7 @@ def scrape_all_tweet_texts(url: str, max_scrolls: int = 5, view_browser: bool = 
     """
     all_tweet_entries = []  
     seen_pairs = set()  # To keep track of unique (username, tweetText)
-
+    logger.debug("Starting scraping process...")
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=view_browser)
         context = browser.new_context(storage_state=AUTH_TWITTER, viewport={"width": 1280, "height": 1024})
@@ -39,6 +39,7 @@ def scrape_all_tweet_texts(url: str, max_scrolls: int = 5, view_browser: bool = 
 
         try:
             page.goto(url)
+            time.sleep(3)
             logger.debug("Page loaded. Waiting for initial tweets...")
 
             try:
@@ -56,14 +57,16 @@ def scrape_all_tweet_texts(url: str, max_scrolls: int = 5, view_browser: bool = 
 
             logger.debug(f"Scrolling down {max_scrolls} times...")
             last_height = page.evaluate("document.body.scrollHeight")
+            time.sleep(2)
             last_height = 0
             for i in range(max_scrolls):
                 if i > 0:
                     page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                    time.sleep(1)
                 logger.debug(f"Scroll attempt {i+1}/{max_scrolls}")
                 
-                time.sleep(3)
                 new_height = page.evaluate("document.body.scrollHeight")
+                time.sleep(3)
                 logger.debug(f"Last height: {last_height} - New height after scroll: {new_height}")
                 if new_height == last_height:
                     logger.debug("Reached bottom of page or no new content loaded.")
@@ -111,20 +114,20 @@ def scrape_all_tweet_texts(url: str, max_scrolls: int = 5, view_browser: bool = 
             browser.close()
     return all_tweet_entries
 
-def transform_post_time(post_time, scrape_time):
-    year_diff = scrape_time.year - post_time.year
-    try:
-        adjusted_time = post_time.replace(year=scrape_time.year)
-    except ValueError:
-        adjusted_time = post_time.replace(year=scrape_time.year, day=28)
+# def transform_post_time(post_time, scrape_time):
+#     year_diff = scrape_time.year - post_time.year
+#     try:
+#         adjusted_time = post_time.replace(year=scrape_time.year)
+#     except ValueError:
+#         adjusted_time = post_time.replace(year=scrape_time.year, day=28)
 
-    if adjusted_time > scrape_time:
-        try:
-            adjusted_time = post_time.replace(year=scrape_time.year - 1)
-        except ValueError:
-            adjusted_time = post_time.replace(year=scrape_time.year - 1, day=28)
+#     if adjusted_time > scrape_time:
+#         try:
+#             adjusted_time = post_time.replace(year=scrape_time.year - 1)
+#         except ValueError:
+#             adjusted_time = post_time.replace(year=scrape_time.year - 1, day=28)
 
-    return adjusted_time
+#     return adjusted_time
 
 def scrape_tags(tags: list[str], max_scrolls: int = 2, view_browser: bool = False) -> pd.DataFrame:
     all_dfs = []
@@ -134,7 +137,7 @@ def scrape_tags(tags: list[str], max_scrolls: int = 2, view_browser: bool = Fals
         target_url = f"https://x.com/search?q={encoded}&src=typed_query&f=live"
         
         tweet_data = scrape_all_tweet_texts(target_url, max_scrolls=max_scrolls, view_browser=view_browser)
-
+        time.sleep(5)
         if tweet_data:
             logger.info(f"Total unique tweet entries scraped for tag '{tag}': {len(tweet_data)}")
         else:
@@ -148,19 +151,22 @@ def scrape_tags(tags: list[str], max_scrolls: int = 2, view_browser: bool = Fals
             clean_tag = lambda x: re.sub(r'[^a-zA-Z0-9ก-๙]', '', x)
             tweet_df['tag'] = clean_tag(tag)
 
-            tweet_df['postTime'] = tweet_df.apply(
-                lambda row: transform_post_time(row['postTimeRaw'], row['scrapeTime']),
-                axis=1
-            )
+            # tweet_df['postTime'] = tweet_df.apply(
+            #     lambda row: transform_post_time(row['postTimeRaw'], row['scrapeTime']),
+            #     axis=1
+            # )
 
             tweet_df['username'] = tweet_df['username'].astype('string')
             tweet_df['tweetText'] = tweet_df['tweetText'].astype('string')
             tweet_df['tag'] = tweet_df['tag'].astype('string')
             tweet_df['postTimeRaw'] = pd.to_datetime(tweet_df['postTimeRaw'])
 
-            tweet_df['year'] = tweet_df['postTime'].dt.year
-            tweet_df['month'] = tweet_df['postTime'].dt.month
-            tweet_df['day'] = tweet_df['postTime'].dt.day
+            tweet_df['year'] = tweet_df['postTimeRaw'].dt.year
+            tweet_df['month'] = tweet_df['postTimeRaw'].dt.month
+            tweet_df['day'] = tweet_df['postTimeRaw'].dt.day
+            # tweet_df['year'] = tweet_df['postTime'].dt.year
+            # tweet_df['month'] = tweet_df['postTime'].dt.month
+            # tweet_df['day'] = tweet_df['postTime'].dt.day
 
             all_dfs.append(tweet_df)
 
@@ -194,7 +200,7 @@ if __name__ == "__main__":
         view_browser = True
         logger.info("Browser will be 'hidden' during scraping.")
 
-    data = scrape_tags(tags=tags, max_scrolls=20, view_browser=view_browser)
+    data = scrape_tags(tags=tags, max_scrolls=30, view_browser=view_browser)
     if not data.empty:
         # Validate the data using Pydantic
         validator = ValidationPydantic(TweetData)

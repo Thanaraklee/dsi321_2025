@@ -15,12 +15,12 @@ class TweetData(BaseModel):
     scrapeTime: datetime
     tag: Optional[str]
     postTimeRaw: datetime
-    postTime: datetime
+    # postTime: datetime
     year: int
     month: int
     day: int
 
-    @field_validator('postTime')
+    @field_validator('postTimeRaw')
     def validate_post_time(cls, v):
         if v.year < 2020 or v > datetime.now():
             raise ValueError("postTime is out of valid range")
@@ -57,7 +57,7 @@ class ValidationPydantic:
         # Validation
         dataset_checks = {
             f"Record Count (≥1000) records: {len(df)}": len(df) >= 1000,
-            f"Time Span (≥24 hours) min: {pd.to_datetime(df['postTime']).min()} max: {pd.to_datetime(df['postTime']).max()}": self._check_time_span(df),
+            f"Time Span (≥24 hours) min: {pd.to_datetime(df['postTimeRaw']).min()} max: {pd.to_datetime(df['postTimeRaw']).max()}": self._check_time_span(df),
             f"No Missing Values missing: {df.isnull().sum().sum()}": df.isnull().sum().sum() == 0,
             f"No 'object' dtype columns columns: {', '.join(f'{k}: {v}' for k, v in df.dtypes.items() if v == 'object')}": not any(df.dtypes == 'object'),
             f"No Duplicate Rows duplicates: {df.duplicated().sum()}": df.duplicated().sum() == 0,
@@ -79,11 +79,11 @@ class ValidationPydantic:
         return all_valid
 
     def _check_time_span(self, df: pd.DataFrame) -> bool:
-        if 'postTime' not in df.columns:
+        if 'postTimeRaw' not in df.columns:
             return False
         try:
-            min_time = pd.to_datetime(df['postTime']).min()
-            max_time = pd.to_datetime(df['postTime']).max()
+            min_time = pd.to_datetime(df['postTimeRaw']).min()
+            max_time = pd.to_datetime(df['postTimeRaw']).max()
             return (max_time - min_time) >= pd.Timedelta(hours=24)
         except Exception as e:
             logger.error(f"Time span check failed: {e}")
