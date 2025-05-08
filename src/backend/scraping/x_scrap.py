@@ -56,7 +56,7 @@ def scrape_all_tweet_texts(url: str, max_scrolls: int = 5, view_browser: bool = 
 
             logger.debug(f"Scrolling down {max_scrolls} times...")
             last_height = page.evaluate("document.body.scrollHeight")
-
+            last_height = 0
             for i in range(max_scrolls):
                 if i > 0:
                     page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
@@ -64,6 +64,7 @@ def scrape_all_tweet_texts(url: str, max_scrolls: int = 5, view_browser: bool = 
                 
                 time.sleep(3)
                 new_height = page.evaluate("document.body.scrollHeight")
+                logger.debug(f"Last height: {last_height} - New height after scroll: {new_height}")
                 if new_height == last_height:
                     logger.debug("Reached bottom of page or no new content loaded.")
                     break
@@ -71,6 +72,7 @@ def scrape_all_tweet_texts(url: str, max_scrolls: int = 5, view_browser: bool = 
 
 
                 articles = page.query_selector_all("article")
+                logger.debug(f"Found {len(articles)} articles on the page.")
                 if articles:
                     for article in articles:
                         displayName = article.query_selector("[data-testid='User-Name']")
