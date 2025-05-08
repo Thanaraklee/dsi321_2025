@@ -129,7 +129,7 @@ def scrape_tags(tags: list[str], max_scrolls: int = 2, view_browser: bool = Fals
 
     for tag in tags:
         encoded = urllib.parse.quote(tag, safe='')
-        target_url = f"https://x.com/search?q={encoded}&src=typeahead_click&f=live"
+        target_url = f"https://x.com/search?q={encoded}&src=typed_query&f=live"
         
         tweet_data = scrape_all_tweet_texts(target_url, max_scrolls=max_scrolls, view_browser=view_browser)
 
@@ -179,9 +179,9 @@ def save_to_parquet(data: pd.DataFrame):
 
 if __name__ == "__main__":
     tags = [
-        # "#ธรรมศาสตร์ช้างเผือก",
+        "#ธรรมศาสตร์ช้างเผือก",
         "#TCAS",
-        # "#รับตรง", 
+        "#รับตรง", 
     ]
 
     view_browser = Prompt.ask('Do you want to view the browser? (Y = Yes, N = No)', choices=['Y', 'N'])
