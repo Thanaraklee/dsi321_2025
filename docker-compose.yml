@@ -62,7 +62,9 @@ services:
 
   ### Prefect CLI
   cli:
-    image: prefecthq/prefect:3-python3.13
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile.cli
     entrypoint: "bash"
     working_dir: "/root/flows"
     volumes:
