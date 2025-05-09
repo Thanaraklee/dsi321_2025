@@ -72,7 +72,7 @@ class LakeFSLoader:
         data.to_parquet(
             lakefs_s3_path,
             storage_options=storage_options,
-            partition_cols=['year', 'month', 'day'],
+            partition_cols=['tag', 'year', 'month', 'day'],
             engine='pyarrow',
         )
 

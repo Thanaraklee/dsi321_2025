@@ -20,16 +20,6 @@ logger = LoggingConfig(level="DEBUG", level_console="DEBUG").get_logger()
 console = Console()
 
 def scrape_all_tweet_texts(url: str, max_scrolls: int = 5, view_browser: bool = False) -> list[dict]:
-    """
-    Scrapes all tweet texts from a given Twitter URL by scrolling down.
-
-    Args:
-        url: The Twitter URL to scrape (e.g., a user profile or search results).
-        max_scrolls: The maximum number of times to scroll down the page.
-
-    Returns:
-        A list of dicts with keys: username, tweetText, scrapeTime.
-    """
     all_tweet_entries = []  
     seen_pairs = set()  # To keep track of unique (username, tweetText)
     logger.debug("Starting scraping process...")
