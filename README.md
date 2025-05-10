@@ -12,27 +12,43 @@
 | Web Scraping |✅|
 | Database(LakeFS) | ✅ |
 | Data Validation (Pydantic) | ✅ |
-| Web Interface (Streamlit) |        |
-| Orchestration (Prefect) |        |
+| Orchestration (Prefect) Part 1: All tweets|✅|
+| Orchestration (Prefect) Part 2: Only new tweets|  |
+| Web Interface (Streamlit) |   |
 
 # Prepare
-1. Create environment
+1. Create a virtual environment
 ```bash
 python -m venv .venv
 ```
-
-2. Activate your environment
+2. Activate the virtual environment
     - Windows
         ```bash
         source .venv/Scripts/activate
         ```
-    - MacOS & Linux 
+    - macOS & Linux
         ```bash
         source .venv/bin/activate
         ```
-3. Run script
+3. Run the startup script
 ```bash
 bash start.sh
 # or
 ./start.sh
 ```
+
+# How to Run Prefect
+1. Start the Prefect server
+```bash
+docker compose --profile server up -d
+```
+2. Connect to the CLI container
+```bash
+docker compose run cli
+```
+3. Run the data pipeline in container
+```bash
+python src/backend/pipeline/data_pipeline.py
+```
+4. View the Prefect flow UI
+    Open your browser and go to: http://localhost:42000
