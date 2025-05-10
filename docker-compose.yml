@@ -3,7 +3,7 @@ x-global-environment: &global-environment
     - .env
 
 services:
-  lakefs_db:
+  lakefsdb:
     container_name: lakefs_db
     image: treeverse/lakefs:1.7.0
     ports:
@@ -16,7 +16,8 @@ services:
       LAKEFS_AUTH_ENCRYPT_SECRET_KEY: "wait"
       LAKEFS_BLOCKSTORE_TYPE: "local"
     <<: *global-environment
-
+    networks:
+      - PrefectNetwork
   ### Prefect Database
   database:
     image: postgres:alpine
@@ -31,7 +32,8 @@ services:
       - db:/var/lib/postgresql/data
     profiles: ["server"]
     <<: *global-environment
-
+    networks:
+      - PrefectNetwork
   ### Prefect Server API and UI
   server:
     image: prefecthq/prefect:3-python3.13
@@ -50,7 +52,8 @@ services:
       - database
     profiles: ["server"]
     <<: *global-environment
-
+    networks:
+      - PrefectNetwork
   ## Prefect Worker
   worker:
     image: prefecthq/prefect:3-python3.13
@@ -59,7 +62,8 @@ services:
     environment:
       - PREFECT_API_URL=http://server:4200/api
     profiles: ["worker"]
-
+    networks:
+      - PrefectNetwork
   ### Prefect CLI
   cli:
     build:
@@ -68,12 +72,22 @@ services:
     entrypoint: "bash"
     working_dir: "/root/flows"
     volumes:
-      - "./src/backend/pipeline:/root/flows"
+      - "./src/backend:/root/flows/src/backend"
+      - "./data/from_prefect:/root/flows/data/from_prefect"
+      - "./config/logging/modern_log.py:/root/flows/config/logging/modern_log.py"
+      - "./config/auth/twitter_auth.json:/root/flows/config/auth/twitter_auth.json"
+      - "./config/path_config.py:/root/flows/config/path_config.py"
+      - "./pyproject.toml:/root/flows/pyproject.toml"
+      - "./.env:/root/flows/.env"
     environment:
       - PREFECT_API_URL=http://server:4200/api
     profiles: ["cli"]
-
+    networks:
+      - PrefectNetwork
 
 volumes:
   prefect:
   db:
+
+networks:
+  PrefectNetwork:

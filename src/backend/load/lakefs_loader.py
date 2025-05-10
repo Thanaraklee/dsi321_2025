@@ -1,5 +1,6 @@
 from lakefs.client import Client
 import lakefs
+from lakefs import repositories
 import subprocess
 import pandas as pd
 from dotenv import load_dotenv
@@ -8,7 +9,7 @@ import shutil
 # Import modern log configuration
 from config.logging.modern_log import LoggingConfig
 # Import path configuration
-from config.path_config import lakefs_s3_path, storage_options, repo_name, branch_name
+from config.path_config import lakefs_s3_path, repo_name, branch_name
 
 logger = LoggingConfig(level="DEBUG", level_console="INFO").get_logger(__name__)
 
@@ -17,11 +18,10 @@ load_dotenv()
 import time  # <-- เพิ่มสำหรับ sleep
 
 class LakeFSLoader:
-    def __init__(self):
+    def __init__(self, host: str = "http://localhost:8001"):
         self.restart_container()
-
         self.client = Client(
-            host="http://localhost:8001",
+            host=host,
             username=os.getenv("ACCESS_KEY"),  
             password=os.getenv("SECRET_KEY"),
             verify_ssl=False,
@@ -62,17 +62,26 @@ class LakeFSLoader:
         except Exception as e:
             logger.error("Error connecting to lakeFS", exc_info=True)
 
-    def load(self, data: pd.DataFrame):
+    def load(self, data: pd.DataFrame, lakefs_endpoint: str):
         logger.info(f"Creating or replacing repository: {repo_name}")
         lakefs.repository(repo_name, client=self.client).create(storage_namespace=f"local://{repo_name}")
 
         logger.info(f"Repository {repo_name} created or already exists.")
 
         logger.debug(f"Uploading data to lakeFS repository: {repo_name} on branch: {branch_name}")
+
+        storage_options = {
+            "key": os.getenv("ACCESS_KEY"),
+            "secret": os.getenv("SECRET_KEY"),
+            "client_kwargs": {
+                "endpoint_url": lakefs_endpoint
+            }
+        }
+        
         data.to_parquet(
             lakefs_s3_path,
             storage_options=storage_options,
-            partition_cols=['tag', 'year', 'month', 'day'],
+            partition_cols=['year', 'month', 'day'],
             engine='pyarrow',
         )
 
@@ -85,5 +94,5 @@ class LakeFSLoader:
 
 
 if __name__ == "__main__":
-    loader = LakeFSLoader()
+    loader = LakeFSLoader(host="http://lakefs_db:8000")
     loader.connect()
