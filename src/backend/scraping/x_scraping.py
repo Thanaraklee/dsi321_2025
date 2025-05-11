@@ -154,6 +154,7 @@ class XScraping:
     def to_dataframe(all_tweet: list[dict]) -> pd.DataFrame:
         logger.info(f"Converting to dataframe...")
         all_tweet = pd.DataFrame(all_tweet)
+        all_tweet['category'] = all_tweet['category'].astype('string')
         all_tweet['username'] = all_tweet['username'].astype('string')
         all_tweet['tweetText'] = all_tweet['tweetText'].astype('string')
         all_tweet['tag'] = all_tweet['tag'].astype('string')

@@ -65,7 +65,6 @@ class LakeFSLoader:
     def load(self, data: pd.DataFrame, lakefs_endpoint: str):
         logger.info(f"Creating or replacing repository: {repo_name}")
         lakefs.repository(repo_name, client=self.client).create(storage_namespace=f"local://{repo_name}")
-
         logger.info(f"Repository {repo_name} created or already exists.")
 
         logger.debug(f"Uploading data to lakeFS repository: {repo_name} on branch: {branch_name}")
@@ -92,7 +91,43 @@ class LakeFSLoader:
         )
         logger.info(f"Data uploaded successfully to {lakefs_s3_path} with {len(valid_data)} records.")
 
+    def incremental_load(self, data: pd.DataFrame, lakefs_endpoint: str):
+        storage_options = {
+            "key": os.getenv("ACCESS_KEY"),
+            "secret": os.getenv("SECRET_KEY"),
+            "client_kwargs": {
+                "endpoint_url": lakefs_endpoint
+            }
+        }
 
+        data_in_lakefs = pd.read_parquet(
+            lakefs_s3_path,
+            storage_options=storage_options,
+            engine='pyarrow',
+        )
+
+        new_unique_data = data.merge(
+            data_in_lakefs,
+            on=["postTimeRaw", "username", "tweetText"],    
+            how="left",
+            indicator=True
+        ).query('_merge == "left_only"').drop(columns=['_merge'])
+
+        cols = [col for col in new_unique_data.columns if not col.endswith('_y')]
+        new_cleaned_df = new_unique_data[cols].copy()
+        new_cleaned_df.columns = [col.replace('_x', '') for col in new_cleaned_df.columns]
+
+        logger.info(f"Number of new records: {len(new_cleaned_df)}")
+
+        data.to_parquet(
+            lakefs_s3_path,
+            storage_options=storage_options,
+            partition_cols=['year', 'month', 'day'],
+            engine='pyarrow',
+        )
+
+        logger.info(f"Data uploaded successfully to {lakefs_s3_path} with {len(new_cleaned_df)} records.")
+        
 if __name__ == "__main__":
     loader = LakeFSLoader(host="http://lakefs_db:8000")
     loader.connect()

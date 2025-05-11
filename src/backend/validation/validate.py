@@ -43,7 +43,7 @@ class ValidationPydantic:
         self.model = model
         self.console = Console()
 
-    def validate(self, df: pd.DataFrame) -> bool:
+    def validate(self, df: pd.DataFrame, scrape_new: bool = False) -> bool:
         all_valid = True
         for idx, row in df.iterrows():
             data_dict = row.to_dict()
@@ -54,14 +54,22 @@ class ValidationPydantic:
                 logger.error(f"Validation error in row {idx}:")
                 logger.error(e.json(indent=2))
         
-        # Validation
-        dataset_checks = {
-            f"Record Count (≥1000) records: {len(df)}": len(df) >= 1000,
-            f"Time Span (≥24 hours) min: {pd.to_datetime(df['postTimeRaw']).min()} max: {pd.to_datetime(df['postTimeRaw']).max()}": self._check_time_span(df),
-            f"No Missing Values missing: {df.isnull().sum().sum()}": df.isnull().sum().sum() == 0,
-            f"No 'object' dtype columns columns: {', '.join(f'{k}: {v}' for k, v in df.dtypes.items() if v == 'object')}": not any(df.dtypes == 'object'),
-            f"No Duplicate Rows duplicates: {df.duplicated().sum()}": df.duplicated().sum() == 0,
-        }
+        if scrape_new:
+            # Validation
+            dataset_checks = {
+                f"No Missing Values missing: {df.isnull().sum().sum()}": df.isnull().sum().sum() == 0,
+                f"No 'object' dtype columns columns: {', '.join(f'{k}: {v}' for k, v in df.dtypes.items() if v == 'object')}": not any(df.dtypes == 'object'),
+                f"No Duplicate Rows duplicates: {df.duplicated().sum()}": df.duplicated().sum() == 0,
+            }
+        else:
+            # Validation
+            dataset_checks = {
+                f"Record Count (≥1000) records: {len(df)}": len(df) >= 1000,
+                f"Time Span (≥24 hours) min: {pd.to_datetime(df['postTimeRaw']).min()} max: {pd.to_datetime(df['postTimeRaw']).max()}": self._check_time_span(df),
+                f"No Missing Values missing: {df.isnull().sum().sum()}": df.isnull().sum().sum() == 0,
+                f"No 'object' dtype columns columns: {', '.join(f'{k}: {v}' for k, v in df.dtypes.items() if v == 'object')}": not any(df.dtypes == 'object'),
+                f"No Duplicate Rows duplicates: {df.duplicated().sum()}": df.duplicated().sum() == 0,
+            }
 
         failed_checks = [k for k, v in dataset_checks.items() if not v]
         if failed_checks:
