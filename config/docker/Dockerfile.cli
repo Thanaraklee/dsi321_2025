@@ -38,6 +38,10 @@ COPY /config/path_config.py /root/flows/config/path_config.py
 
 COPY .env /root/flows/.env
 
+COPY start-prefect.sh /root/flows/start-prefect.sh
+
 RUN pip install --no-cache-dir -e .
 
 RUN playwright install --with-deps
+
+ENTRYPOINT ["bash"]

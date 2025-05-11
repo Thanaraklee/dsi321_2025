@@ -34,6 +34,7 @@ services:
     <<: *global-environment
     networks:
       - PrefectNetwork
+
   ### Prefect Server API and UI
   server:
     container_name: prefect
@@ -92,6 +93,7 @@ services:
       - "./config/path_config.py:/root/flows/config/path_config.py"
       - "./pyproject.toml:/root/flows/pyproject.toml"
       - "./.env:/root/flows/.env"
+      - "./start-prefect.sh:/root/flows/start-prefect.sh"
     environment:
       - PREFECT_API_URL=http://server:4200/api
     profiles: ["cli"]

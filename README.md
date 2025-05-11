@@ -16,6 +16,40 @@
 | Orchestration (Prefect) Part 2: Only new tweets|✅|
 | Web Interface (Streamlit) |   |
 
+# Project Structure
+```
+.
+├── config                          # Configuration files for Docker, logging, and paths
+│   ├── docker                        
+│   │   ├── Dockerfile.cli          # Dockerfile for CLI usage
+│   │   └── Dockerfile.worker       # Dockerfile for worker services
+│   ├── logging
+│   │   └── modern_log.py           # Custom logging configuration
+│   └── path_config.py              # Path configuration for file management
+├── src                             # Source code directory
+│   ├── backend                     # Backend logic for scraping, validation, loading
+│   │   ├── load
+│   │   │   └── lakefs_loader.py    # Module for loading data to lakeFS
+│   │   ├── pipeline
+│   │   │   ├── incremental_scrape_flow.py   # Scraping flow for incremental data
+│   │   │   └── initial_scrape_flow.py       # Scraping flow for initial/full data
+│   │   ├── scraping
+│   │   │   ├── x_login.py          # Script to log into X 
+│   │   │   └── x_scraping.py       # Script to scrape data from X
+│   │   └── validation
+│   │   │   └── validate.py         # Data validation logic
+│   └── fronend                     # Frontend components (Note: typo, should be "frontend")
+│       └── streamlit.py            # Streamlit app for data display
+├── test                            # Unit and integration test files
+├── .env.example                    # Example of environment variable file
+├── .gitignore                      # Git ignore rules
+├── README.md                       # Project documentation
+├── docker-compose.yml              # Docker Compose configuration
+├── pyproject.toml                  # Python project configuration
+├── requirements.txt                # Python package requirements
+└── start.sh                        # Startup script for the project
+```
+
 # Prepare
 1. Create a virtual environment
 ```bash

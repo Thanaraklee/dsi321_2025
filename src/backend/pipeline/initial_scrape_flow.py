@@ -45,7 +45,7 @@ def load_to_lakefs(data: pd.DataFrame, lakefs_endpoint: str = None) -> None:
 
 @task
 async def scrape_tag(category: str, tag: str, tag_url: str) -> list[dict]:
-    return await XScraping().scrape_all_tweet_texts(category=category, tag=tag, tag_url=tag_url, max_scrolls=10)
+    return await XScraping().scrape_all_tweet_texts(category=category, tag=tag, tag_url=tag_url, max_scrolls=15)
 
 @flow(name="Initial Scrape Flow")
 async def scrape_flow():
