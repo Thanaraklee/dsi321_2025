@@ -13,7 +13,7 @@
 | Database(LakeFS) | ✅ |
 | Data Validation (Pydantic) | ✅ |
 | Orchestration (Prefect) Part 1: All tweets|✅|
-| Orchestration (Prefect) Part 2: Only new tweets|  |
+| Orchestration (Prefect) Part 2: Only new tweets|✅|
 | Web Interface (Streamlit) |   |
 
 # Prepare
@@ -37,7 +37,7 @@ bash start.sh
 ./start.sh
 ```
 
-# How to Run Prefect
+# Running Prefect
 1. Start the Prefect server
 ```bash
 docker compose --profile server up -d
@@ -46,9 +46,13 @@ docker compose --profile server up -d
 ```bash
 docker compose run cli
 ```
-3. Run the data pipeline in container
+3. Run the initial scraping flow (to collect all tweets for base data)
 ```bash
-python src/backend/pipeline/data_pipeline.py
+python src/backend/pipeline/initial_scrape_flow.py
 ```
-4. View the Prefect flow UI
-    Open your browser and go to: http://localhost:42000
+4. Schedule scraping every 15 minutes (incremental updates)
+```bash
+python src/backend/pipeline/incremental_scrape_flow.py
+```
+- **View the Prefect flow UI**
+Open your browser and go to: http://localhost:42000 
