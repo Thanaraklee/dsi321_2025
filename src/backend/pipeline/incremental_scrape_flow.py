@@ -43,7 +43,6 @@ def load_to_lakefs(data: pd.DataFrame, lakefs_endpoint: str = None) -> None:
 async def scrape_tag(category: str, tag: str, tag_url: str, max_scrolls: int) -> list[dict]:
     return await XScraping().scrape_all_tweet_texts(category=category, tag=tag, tag_url=tag_url, max_scrolls=max_scrolls)
 
-@flow(name="Incremental Scrape Flow")
 async def scrape_flow():
 
     tag_urls = encode_tags(tags)
@@ -86,13 +85,16 @@ async def scrape_flow():
     else:
         logger.warning("Validation failed, data not saved.")
 
+@flow(name="Incremental Scrape Flow")
+def scrape_flow_wrapper():
+    asyncio.run(scrape_flow())
+
 if __name__ == "__main__":
-    scrape_flow.from_source(
+    scrape_flow_wrapper.from_source(
         source=GitRepository(
             url="https://github.com/Thanaraklee/dsi321_2025.git",
-            # commit_sha=os.getenv("GITHUB_SHA"),
         ),
-        entrypoint="src/backend/pipeline/incremental_scrape_flow.py:scrape_flow"
+        entrypoint="src/backend/pipeline/incremental_scrape_flow.py:scrape_flow_wrapper"
     ).deploy(
         name="scrape-x-every-15m",
         work_pool_name="x-worker",
