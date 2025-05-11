@@ -57,9 +57,21 @@ services:
       - PrefectNetwork
   ## Prefect Worker
   worker:
-    image: prefecthq/prefect:3-python3.13
+    # image: prefecthq/prefect:3-python3.13
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile.worker
     restart: always
     entrypoint: ["/opt/prefect/entrypoint.sh", "prefect", "worker", "start", "-p", "x-worker"]
+    working_dir: "/root/flows"
+    volumes:
+      - "./src/backend:/root/flows/src/backend"
+      - "./data/from_prefect:/root/flows/data/from_prefect"
+      - "./config/logging/modern_log.py:/root/flows/config/logging/modern_log.py"
+      - "./config/auth/twitter_auth.json:/root/flows/config/auth/twitter_auth.json"
+      - "./config/path_config.py:/root/flows/config/path_config.py"
+      - "./pyproject.toml:/root/flows/pyproject.toml"
+      - "./.env:/root/flows/.env"
     environment:
       - PREFECT_API_URL=http://server:4200/api
     profiles: ["worker"]

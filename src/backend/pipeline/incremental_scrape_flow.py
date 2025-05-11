@@ -1,7 +1,6 @@
 from prefect import flow, task
 from prefect.schedules import Interval
-from prefect.runner.storage import GitRepository
-import os
+from pathlib import Path
 import pandas as pd
 from datetime import timedelta
 import asyncio
@@ -44,7 +43,6 @@ async def scrape_tag(category: str, tag: str, tag_url: str, max_scrolls: int) ->
     return await XScraping().scrape_all_tweet_texts(category=category, tag=tag, tag_url=tag_url, max_scrolls=max_scrolls)
 
 async def scrape_flow():
-
     tag_urls = encode_tags(tags)
     semaphore = asyncio.Semaphore(3)
     delay_seconds = 30
@@ -91,15 +89,13 @@ def scrape_flow_wrapper():
 
 if __name__ == "__main__":
     scrape_flow_wrapper.from_source(
-        source=GitRepository(
-            url="https://github.com/Thanaraklee/dsi321_2025.git",
-        ),
-        entrypoint="src/backend/pipeline/incremental_scrape_flow.py:scrape_flow_wrapper"
+        source=Path(__file__).parent,
+        entrypoint="./incremental_scrape_flow.py:scrape_flow_wrapper",
     ).deploy(
         name="scrape-x-every-15m",
         work_pool_name="x-worker",
         schedule=Interval(
             timedelta(minutes=15),
             timezone="Asia/Bangkok"
-        ),
+        )
     )

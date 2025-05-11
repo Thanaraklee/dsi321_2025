@@ -1,12 +1,14 @@
 from dotenv import load_dotenv
+from pathlib import Path
 import os
 
 load_dotenv()
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 DATA = "data"
 AUTH = "config/auth"
 
-AUTH_TWITTER = AUTH + "/twitter_auth.json"
+AUTH_TWITTER = BASE_DIR / "config" / "auth" / "twitter_auth.json"
 
 repo_name = "tweets-repo"
 branch_name = "main"

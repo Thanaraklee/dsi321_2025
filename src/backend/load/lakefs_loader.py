@@ -117,17 +117,19 @@ class LakeFSLoader:
         new_cleaned_df = new_unique_data[cols].copy()
         new_cleaned_df.columns = [col.replace('_x', '') for col in new_cleaned_df.columns]
 
-        logger.info(f"Number of new records: {len(new_cleaned_df)}")
+        if len(new_cleaned_df) > 0:
+            logger.info(f"Number of new records: {len(new_cleaned_df)}")
+            data.to_parquet(
+                lakefs_s3_path,
+                storage_options=storage_options,
+                partition_cols=['year', 'month', 'day'],
+                engine='pyarrow',
+            )
 
-        data.to_parquet(
-            lakefs_s3_path,
-            storage_options=storage_options,
-            partition_cols=['year', 'month', 'day'],
-            engine='pyarrow',
-        )
+            logger.info(f"Data uploaded successfully to {lakefs_s3_path} with {len(new_cleaned_df)} records.")
+        else:
+            logger.info("No new records found.")
 
-        logger.info(f"Data uploaded successfully to {lakefs_s3_path} with {len(new_cleaned_df)} records.")
-        
 if __name__ == "__main__":
     loader = LakeFSLoader(host="http://lakefs_db:8000")
     loader.connect()
