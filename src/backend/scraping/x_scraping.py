@@ -42,7 +42,7 @@ class XScraping:
             if await self.is_article_present(page):
                 return True
             logger.warning(f"Retry {retry+1}/{max_retries} - Waiting before next try...")
-            await asyncio.sleep(random.uniform(6.0, 12.0))
+            await asyncio.sleep(random.uniform(10.0, 22.0))
         return False
 
     async def is_article_present(self, page) -> bool:
@@ -61,10 +61,13 @@ class XScraping:
             if displayName:
                 spans = await displayName.query_selector_all("span")
                 time_tag = await displayName.query_selector("time")
-                asyncio.sleep(random.uniform(1.0, 7.5))
+                asyncio.sleep(random.uniform(5.0, 11.5))
                 tweetText_tag = await article.query_selector("[data-testid='tweetText']")
                 if len(spans) > 3 and time_tag and tweetText_tag:
-                    userName = await spans[3].text_content()
+                    if len(spans) == 4:
+                        userName = await spans[2].text_content()
+                    else:
+                        userName = await spans[3].text_content()
                     userName = userName.strip()
                     dateTime = await time_tag.get_attribute("datetime")
                     tweetText = await tweetText_tag.text_content()
@@ -108,7 +111,7 @@ class XScraping:
             )
             page = await context.new_page()
             await page.goto(tag_url)
-            await asyncio.sleep(random.uniform(2, 20.0))
+            await asyncio.sleep(random.uniform(10, 20.0))
 
             # Check if the page has loaded tweets
             if not await self.wait_for_articles_with_retry(page):
@@ -119,10 +122,10 @@ class XScraping:
             now_height = 0
             for i in range(max_scrolls):
                 if i > 0:
-                    scroll_distance = random.randint(300, 800)
+                    scroll_distance = random.randint(2800, 3800)
                     await page.evaluate(f"window.scrollBy(0, {scroll_distance});")
                     logger.debug(f"Scroll attempt {i+1}/{max_scrolls} - Scrolling by {scroll_distance}px")
-                    await asyncio.sleep(random.uniform(5, 17))
+                    await asyncio.sleep(random.uniform(10, 17))
                     # Check if the page has loaded tweets
                     if not await self.wait_for_articles_with_retry(page):
                         logger.warning(f"No articles found on scroll {i+1}")
@@ -130,7 +133,7 @@ class XScraping:
                 
                 logger.debug(f"Scroll attempt {i+1}/{max_scrolls} - {tag}")
                 new_height = await page.evaluate("document.body.scrollHeight")
-                await asyncio.sleep(random.uniform(1, 14))
+                await asyncio.sleep(random.uniform(9, 14))
                 logger.debug(f"Now height: {now_height} - New height after scroll: {new_height}")
                 
                 if new_height == now_height:
