@@ -18,6 +18,9 @@ services:
     <<: *global-environment
     networks:
       - PrefectNetwork
+    volumes:
+      - ./data/:/home/lakefs/
+  
   ### Prefect Database
   database:
     image: postgres:alpine
