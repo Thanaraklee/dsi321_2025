@@ -14,6 +14,7 @@
 | Data Validation (Pydantic) | ✅ |
 | Orchestration (Prefect) Part 1: All tweets|✅|
 | Orchestration (Prefect) Part 2: Only new tweets|✅|
+| ML (Word Cloud)|✅|
 | Web Interface (Streamlit) |   |
 
 # Project Structure
@@ -34,7 +35,7 @@
 │   │   │   ├── incremental_scrape_flow.py   # Scraping flow for incremental data
 │   │   │   └── initial_scrape_flow.py       # Scraping flow for initial/full data
 │   │   ├── scraping
-│   │   │   ├── x_login.py          # Script to log into X 
+│   │   │   ├── x_login.py          # Script to log in to X 
 │   │   │   └── x_scraping.py       # Script to scrape data from X
 │   │   └── validation
 │   │   │   └── validate.py         # Data validation logic
