@@ -68,7 +68,6 @@ echo "== Step 7: Run CLI Container =="
 read -p "Run CLI Container? (y/n): " run_initial
 if [[ $run_initial == "y" ]]; then
     docker compose run cli
-    python --version
 fi
 
 

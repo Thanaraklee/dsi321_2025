@@ -11,21 +11,29 @@ AUTH = "config/auth"
 AUTH_TWITTER = BASE_DIR / "config" / "auth" / "twitter_auth.json"
 
 repo_name = "tweets-repo"
+repo_name_ml = "tweets-repo-wordcloud"
+repo_name_hash = "hash"
+
 branch_name = "main"
+
 path = "tweets.parquet"
+path_ml = "tweets_wordcloud.parquet"
+path_hash = "latest_hash.md5"
 
 lakefs_s3_path = f"s3://{repo_name}/{branch_name}/{path}"
+lakefs_s3_path_ml = f"s3://{repo_name_ml}/{branch_name}/{path_ml}"
+lakefs_s3_path_hash = f"s3://{repo_name_hash}/{branch_name}/{path_hash}"
 
 tags = {
     "ธรรมศาสตร์": [
         "#ธรรมศาสตร์ช้างเผือก",
-        "#TCAS",
-        "#รับตรง",
-        "#ทีมมธ",
-        "#มธ", 
-        "#dek70", 
-        "#มอท่อ",
-        "#TU89",
+        # "#TCAS",
+        # "#รับตรง",
+        # "#ทีมมธ",
+        # "#มธ", 
+        # "#dek70", 
+        # "#มอท่อ",
+        # "#TU89",
     ],
     # "คณะนิติศาสตร์":[
     #     "#นิติศาสตร์",
@@ -35,7 +43,7 @@ tags = {
     # ],
     # "คณะพาณิชยศาสตร์และการบัญชี":[
     #     "#บัญชีมธ",
-    #     "##บริหารมธ",
+    #     "#บริหารมธ",
     #     "#BBATU",
     # ],
     # "คณะรัฐศาสตร์":[
