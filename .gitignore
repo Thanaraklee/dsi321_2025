@@ -2,7 +2,6 @@ config/auth/
 tmp/
 data/
 src/backend/config/
-test/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
