@@ -10,6 +10,10 @@ import hashlib
 from config.path_config import lakefs_s3_path_ml, lakefs_s3_path
 # Import LakeFS loader
 from src.backend.load.lakefs_loader import LakeFSLoader
+# Import modern logging configuration
+from config.logging.modern_log import LoggingConfig
+
+logger = LoggingConfig(level="DEBUG", level_console="INFO").get_logger()
 
 load_dotenv()
 
@@ -47,26 +51,12 @@ class WordCloud:
         return text
     
     def classify(self, df: pd.DataFrame):
-        lakefs_endpoint = "http://localhost:8001/"
-        storage_options = {
-            "key": os.getenv("ACCESS_KEY"),
-            "secret": os.getenv("SECRET_KEY"),
-            "client_kwargs": {
-                "endpoint_url": lakefs_endpoint
-            }
-        }
-        # df = pd.read_parquet(
-        #     lakefs_s3_path,
-        #     storage_options=storage_options,
-        #     engine='pyarrow',
-        # )
-
         df['tweetText'] = df['tweetText'].str.replace(r'#\S+', '', regex=True).str.strip()
         df.sort_values(by=['postTimeRaw'], ascending=True, inplace=True)
-        df.drop_duplicates(subset="tweetText")
+        df.drop_duplicates(subset="tweetText", inplace=True)
         df['index'] = df.index + 1
         df_dict:dict = df[['postTimeRaw', 'tweetText', 'index']].to_dict(orient='records')
-        step = 50
+        step = 20
         prev_stop = 0
 
         all_response = []
@@ -78,9 +68,9 @@ class WordCloud:
             stop = ind
             prev_stop = stop
             rows = df_dict[start:stop]
-            print(f"Processing rows {start} to {stop}")
+            logger.info(f"Processing rows {start} to {stop}")
             
-            response = self.classify_messages(rows)
+            response = self.classify_messages(tweets_eles=rows, faq_topic=faq_topic, faq_subtopic=faq_subtopic, issue_topic=issue_topic, issue_subtopic=issue_subtopic)
             
             for row in response['issue']:
                 for topic in row['topic']:
@@ -96,8 +86,10 @@ class WordCloud:
             all_response.append(response)
         faqs = [faq for response in all_response for faq in response['faq']]
         faqs_df = pd.DataFrame(faqs)
+        logger.info(f"df.columns: {df.columns.tolist()}")
+        logger.info(f"faqs_df.columns: {faqs_df.columns.tolist()}")
         faqs_df = faqs_df.merge(
-            df[['index', 'postTimeRaw']],
+            df[['index', 'tag', 'username', 'postTimeRaw', 'year', 'month', 'day']],
             how='left',
             on='index'
         )
@@ -114,7 +106,10 @@ class WordCloud:
 
         faqs_df['topic'] = faqs_df['topic'].apply(lambda x: self.remove_stop_words_from_text(x, stop_word))
         faqs_df['subtopic'] = faqs_df['subtopic'].apply(lambda x: self.remove_stop_words_from_text(x, stop_word))
-
+        faqs_df = faqs_df.rename(columns={
+            "text": "tweetText"
+            })
+        faqs_df.drop(columns=['index'], inplace=True)
         return faqs_df
 
 if __name__ == "__main__":

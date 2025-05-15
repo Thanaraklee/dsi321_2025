@@ -58,6 +58,15 @@ class XScraping:
     async def extract_articles(self, category: str, tag: str, count_tweets: int, articles: list, seen_pairs: set, all_tweet_entries: list) -> None:
         for i, article in enumerate(articles):
             displayName = await article.query_selector("[data-testid='User-Name']")
+            if not displayName:
+                logger.debug("No display name found for the article.")
+                continue
+            link_elements = await displayName.query_selector_all("a")
+            if len(link_elements) <= 2:
+                logger.debug("Not enough link elements in displayName.")
+                continue
+            link_element = link_elements[2]
+            tweet_link = await link_element.get_attribute("href")
             if displayName:
                 spans = await displayName.query_selector_all("span")
                 time_tag = await displayName.query_selector("time")
@@ -86,7 +95,8 @@ class XScraping:
                                     "username": userName,
                                     "tweetText": tweetText,
                                     "postTimeRaw": dt_naive,
-                                    "scrapeTime": now.strftime("%Y-%m-%dT%H:%M:%S")
+                                    "scrapeTime": now.strftime("%Y-%m-%dT%H:%M:%S"),
+                                    "tweet_link": f"https://x.com{tweet_link}"
                                 })
                                 count_tweets += 1
                                 logger.debug(f"Scraped tweet {count_tweets} - {tag}")
@@ -98,7 +108,7 @@ class XScraping:
             else:
                 logger.debug("No display name found for the article.")
 
-    async def scrape_all_tweet_texts(self, category: str, tag: str, tag_url: str, max_scrolls: int = 10, view_browser: bool = True) -> list[dict]:
+    async def scrape_all_tweet_texts(self, category: str, tag: str, tag_url: str, max_scrolls: int = 1, view_browser: bool = True) -> list[dict]:
         logger.debug(f"Starting scraping: {tag}")
         all_tweet_entries = []
         seen_pairs = set() 
@@ -161,6 +171,7 @@ class XScraping:
         all_tweet['username'] = all_tweet['username'].astype('string')
         all_tweet['tweetText'] = all_tweet['tweetText'].astype('string')
         all_tweet['tag'] = all_tweet['tag'].astype('string')
+        all_tweet['tweet_link'] = all_tweet['tweet_link'].astype('string')
 
         all_tweet['year'] = all_tweet['postTimeRaw'].dt.year
         all_tweet['month'] = all_tweet['postTimeRaw'].dt.month
@@ -179,120 +190,120 @@ async def main():
     tags = {
         "ธรรมศาสตร์": [
             "#ธรรมศาสตร์ช้างเผือก",
-            "#TCAS",
-            "#รับตรง",
-            "#ทีมมธ",
-            "#มธ", 
-            "#dek70", 
-            "#มอท่อ",
-            "#TU89",
+            # "#TCAS",
+            # "#รับตรง",
+            # "#ทีมมธ",
+            # "#มธ", 
+            # "#dek70", 
+            # "#มอท่อ",
+            # "#TU89",
         ],
-        "คณะนิติศาสตร์":[
-            # "#นิติศาสตร์",
-            # "#LawTU",
-            # "#TUlaw",
-            "#นิติมธ",
-        ],
-        "คณะพาณิชยศาสตร์และการบัญชี":[
-            "#บัญชีมธ",
-            "##บริหารมธ",
-            "#BBATU",
-        ],
-        "คณะรัฐศาสตร์":[
-            "#รัฐศาสตร์มธ",
-            "#LLBTU",
-            "#BIRTU",
-            "#singhadang",
-            "#สิงห์แดง",
-        ],
-        "คณะเศรษฐศาสตร์":[
-            "#เสดสาดมธ",
-            # "#EconTU",
-            # "#TUeconomics",
-        ],
-        "คณะสังคมสงเคราะห์ศาสตร์":[
-            "#สังคมสงเคราะห์มธ",
-            # "#SocialWorkTU",
-        ],
-        "คณะสังคมวิทยาและมานุษยวิทยา":[
-            "#สังวิทมธ",
-            # "#AnthroTU",
-        ],
-        "คณะศิลปศาสตร์":[
-            "#สินสาดมธ",
-            "#LartsTU",
-            "#BASTU",
-        ],
-        "คณะวารสารศาสตร์และสื่อสารมวลชน":[
-            "#BJMTU",
-            "#JCTU",
-            "#วารสารมธ",
-        ],
-        "คณะวิทยาศาสตร์และเทคโนโลยี":[
-            "#วิทยามธ",
-            "#วิดยามธ",
-        ],
-        "คณะวิศวกรรมศาสตร์":[
-            "#วิดวะมธ",
-            # "#EngTU",
-            # "#TUengineering",
-        ],
-        "คณะสถาปัตยกรรมศาสตร์และการผังเมือง":[
-            "#APTU",
-            "#สถาปัตมธ",
-            "#ถาปัตมธ",
-            "#สถาปัตย์มธ",
-        ],
-        "คณะศิลปกรรมศาสตร์":[
-            "#ละคอนมธ",
-            "#สินกำมธ",
-        ],
-        "คณะแพทยศาสตร์":[
-            "#แพทย์มธ",
-            # "#MedTU",
-            # "#TUmedicine",
-        ],
-        "คณะสหเวชศาสตร์":[
-            "#สหเวชมธ",
-            "#กายภาพมธ",
-            "#เทคนิคมธ",
-        ],
-        "คณะทันตแพทยศาสตร์":[
-            "#ทันตะมธ",
-            # "#DentTU",
-            # "#TUDentistry",
-        ],
-        "คณะพยาบาลศาสตร์":[
-            "#พยาบาลมธ",
-            # "#NurseTU",
-            # "#TUnursing",
-        ],
-        "คณะสาธารณสุขศาสตร์":[
-            "#fphtu",
-            "#fphthammasat",
-        ],
-        "คณะเภสัชศาสตร์":[
-            "#เภสัชมธ",
-            # "#PharmTU",
-            # "#TUpharmacy",
-        ],
-        "คณะวิทยาการเรียนรู้และศึกษาศาสตร์":[
-            "#lsedtu",
-            "#lsed",
-            "#คณะวิทยาการเรียนรู้และศึกษาศาสตร์",
-        ],
-        "วิทยาลัยพัฒนศาสตร์ ป๋วย อึ๊งภากรณ์":[
-            "#psdsTU",
-            "#วป๋วย",
-            "#วิทยาลัยป๋วย",
-            "#วิทยาลัยพัฒนศาสตร์",
-        ],
-        "วิทยาลัยนวัตกรรม":[
-            "#นวัตมธ",
-            "#CITU",
-            "#CITUSC",
-            "#CITUTU",
-        ],
+        # "คณะนิติศาสตร์":[
+        #     # "#นิติศาสตร์",
+        #     # "#LawTU",
+        #     # "#TUlaw",
+        #     "#นิติมธ",
+        # ],
+        # "คณะพาณิชยศาสตร์และการบัญชี":[
+        #     "#บัญชีมธ",
+        #     "##บริหารมธ",
+        #     "#BBATU",
+        # ],
+        # "คณะรัฐศาสตร์":[
+        #     "#รัฐศาสตร์มธ",
+        #     "#LLBTU",
+        #     "#BIRTU",
+        #     "#singhadang",
+        #     "#สิงห์แดง",
+        # ],
+        # "คณะเศรษฐศาสตร์":[
+        #     "#เสดสาดมธ",
+        #     # "#EconTU",
+        #     # "#TUeconomics",
+        # ],
+        # "คณะสังคมสงเคราะห์ศาสตร์":[
+        #     "#สังคมสงเคราะห์มธ",
+        #     # "#SocialWorkTU",
+        # ],
+        # "คณะสังคมวิทยาและมานุษยวิทยา":[
+        #     "#สังวิทมธ",
+        #     # "#AnthroTU",
+        # ],
+        # "คณะศิลปศาสตร์":[
+        #     "#สินสาดมธ",
+        #     "#LartsTU",
+        #     "#BASTU",
+        # ],
+        # "คณะวารสารศาสตร์และสื่อสารมวลชน":[
+        #     "#BJMTU",
+        #     "#JCTU",
+        #     "#วารสารมธ",
+        # ],
+        # "คณะวิทยาศาสตร์และเทคโนโลยี":[
+        #     "#วิทยามธ",
+        #     "#วิดยามธ",
+        # ],
+        # "คณะวิศวกรรมศาสตร์":[
+        #     "#วิดวะมธ",
+        #     # "#EngTU",
+        #     # "#TUengineering",
+        # ],
+        # "คณะสถาปัตยกรรมศาสตร์และการผังเมือง":[
+        #     "#APTU",
+        #     "#สถาปัตมธ",
+        #     "#ถาปัตมธ",
+        #     "#สถาปัตย์มธ",
+        # ],
+        # "คณะศิลปกรรมศาสตร์":[
+        #     "#ละคอนมธ",
+        #     "#สินกำมธ",
+        # ],
+        # "คณะแพทยศาสตร์":[
+        #     "#แพทย์มธ",
+        #     # "#MedTU",
+        #     # "#TUmedicine",
+        # ],
+        # "คณะสหเวชศาสตร์":[
+        #     "#สหเวชมธ",
+        #     "#กายภาพมธ",
+        #     "#เทคนิคมธ",
+        # ],
+        # "คณะทันตแพทยศาสตร์":[
+        #     "#ทันตะมธ",
+        #     # "#DentTU",
+        #     # "#TUDentistry",
+        # ],
+        # "คณะพยาบาลศาสตร์":[
+        #     "#พยาบาลมธ",
+        #     # "#NurseTU",
+        #     # "#TUnursing",
+        # ],
+        # "คณะสาธารณสุขศาสตร์":[
+        #     "#fphtu",
+        #     "#fphthammasat",
+        # ],
+        # "คณะเภสัชศาสตร์":[
+        #     "#เภสัชมธ",
+        #     # "#PharmTU",
+        #     # "#TUpharmacy",
+        # ],
+        # "คณะวิทยาการเรียนรู้และศึกษาศาสตร์":[
+        #     "#lsedtu",
+        #     "#lsed",
+        #     "#คณะวิทยาการเรียนรู้และศึกษาศาสตร์",
+        # ],
+        # "วิทยาลัยพัฒนศาสตร์ ป๋วย อึ๊งภากรณ์":[
+        #     "#psdsTU",
+        #     "#วป๋วย",
+        #     "#วิทยาลัยป๋วย",
+        #     "#วิทยาลัยพัฒนศาสตร์",
+        # ],
+        # "วิทยาลัยนวัตกรรม":[
+        #     "#นวัตมธ",
+        #     "#CITU",
+        #     "#CITUSC",
+        #     "#CITUTU",
+        # ],
         # "วิทยาลัยสหวิทยาการ":[
         #     "#สหวิทยาการธรรมศาสตร์",
         #     "#InterdisciplinaryTU",
@@ -370,7 +381,7 @@ async def main():
     is_valid = True
     if is_valid:
         os.makedirs('data', exist_ok=True)
-        data.to_csv('data/tweet_data.csv', index=False)
+        data.to_csv('data/tweet_data_test.csv', index=False)
         logger.info("CSV file saved.")
         x_scraping.load_to_lakefs(data=data, lakefs_endpoint="http://localhost:8001")
 

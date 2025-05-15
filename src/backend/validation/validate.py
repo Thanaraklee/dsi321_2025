@@ -13,9 +13,8 @@ class TweetData(BaseModel):
     username: str
     tweetText: str
     scrapeTime: datetime
-    tag: Optional[str]
+    tag: str
     postTimeRaw: datetime
-    # postTime: datetime
     year: int
     month: int
     day: int
@@ -61,6 +60,7 @@ class ValidationPydantic:
                 f"No 'object' dtype columns columns: {', '.join(f'{k}: {v}' for k, v in df.dtypes.items() if v == 'object')}": not any(df.dtypes == 'object'),
                 f"No Duplicate Rows duplicates: {df.duplicated().sum()}": df.duplicated().sum() == 0,
             }
+            
         else:
             # Validation
             dataset_checks = {

@@ -103,6 +103,24 @@ services:
     networks:
       - PrefectNetwork
 
+  streamlit:
+    container_name: streamlit
+    working_dir: "/app"
+    build:
+      context: .
+      dockerfile: config/docker/Dockerfile.streamlit
+    ports:
+        - 8501:8501
+    expose:
+      - 8501
+    volumes:
+      - "./src/frontend:/app/src/frontend"
+      - "./config/path_config.py:/app/config/path_config.py"
+      - "./pyproject.toml:/app/pyproject.toml"
+      - "./.env:/app/.env"
+    networks:
+      - PrefectNetwork
+
 volumes:
   prefect:
   db:

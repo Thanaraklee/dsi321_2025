@@ -1,0 +1,7 @@
+altair==5.5.0
+pandas==2.2.3
+python-dotenv==1.1.0
+streamlit==1.45.0
+streamlit-echarts==0.4.0
+fsspec==2025.3.2
+s3fs==2025.3.2
