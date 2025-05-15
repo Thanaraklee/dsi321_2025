@@ -1,9 +1,33 @@
-# DSI321
+# DSI321 Project
 # CI Status
 |  | |
 | - | :- |
 | Security | [![Bandit](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/bandit.yml/badge.svg?branch=main)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/bandit.yml) [![CodeQL](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/github-code-scanning/codeql) |
 | Dataset Validation | [![Validation](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/validation.yml/badge.svg)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/validation.yml) |
+
+# Overview
+This system was developed to Track and analyze public data related to Thammasat University in academic terms using real-time data extraction and natural language processing (NLP) techniques to:
+- Check comments and articles mentioning TU
+- Analyze the sentiment and topic of the content
+- Alert the PR department when important information is found
+- Adjust the communication strategy to suit the situation
+- Analyze the public opinion situation on the university
+
+# Benefits
+- **Educational Benefits**
+    - Learn to implement a real-world data pipeline using Python and open-source tools.
+    - Gain hands-on experience with Docker, lakeFS, Streamlit, and Prefect.
+    - Understand CI/CD, data validation, and modular architecture in data engineering.
+
+- **Practical Benefits**
+    - Offers a working template for social media data collection and analysis.
+    - Supports real-time incremental scraping with scheduled execution.
+    - Easy deployment with Docker for both development and production environments.
+
+- **Organizational Benefits**
+    - Promotes reproducibility and scalability using lakeFS and orchestration tools.
+    - Validated datasets ensure reliable business or academic insights.
+    - Can be adapted for sentiment analysis, market research, or public opinion monitoring.
 
 # Project Status
 | Module / Tool | Status |
@@ -16,6 +40,33 @@
 | Orchestration (Prefect) Part 2: Only new tweets|✅|
 | ML (Word Cloud)|✅|
 | Web Interface (Streamlit) |✅|
+
+# Resources
+- **Tools Used**
+    - **Web Scraping**: Python `requests`, `Selenium` for X login/scraping
+    - **Data Validation**: `Pydantic`
+    - **Data Storage**: `lakeFS`
+    - **Orchestration**: `Prefect`
+    - **Visualization**: Stream`lit
+    - **Logging**: `Rich`, Custom Logger
+    - **CI/CD**: GitHub Actions (`Bandit`, `CodeQL`, Dataset Validation)
+
+- **Hardware Requirements**
+    - Docker-compatible environment
+    - Local or cloud system with:
+        - At least 4 GB RAM
+        - Internet access for X data
+        - Port availability for Prefect UI (default: `localhost:4200`)
+
+# Risks and Mitigation Strategies
+|**Risk**|**Description**|**Mitigation**|
+|-|-|-|
+|**API Rate Limit**| X API may enforce rate limits or ban IPs during scraping| Use randomized intervals, rotate IPs, or apply for API access|
+|**ML Limitations**| Current ML component is a simple word cloud, which lacks depth | Extend with NLP (e.g., sentiment analysis, keyword clustering)|
+|**Docker Setup Issues**| Misconfiguration may prevent services from running correctly   | Provide a well-documented `docker-compose.yml` and startup script (`start.sh`) |
+|**Data Schema Drift**| Changes in X’s HTML/CSS may break scraping| Use robust selectors and frequently monitor scraping modules|
+|**Validation Failures**| Malformed data might bypass or crash the pipeline| Enforce strict schema validation using Pydantic before storage|
+
 
 # Project Structure
 ```
