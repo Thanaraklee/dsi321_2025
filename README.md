@@ -15,7 +15,7 @@
 | Orchestration (Prefect) Part 1: All tweets|✅|
 | Orchestration (Prefect) Part 2: Only new tweets|✅|
 | ML (Word Cloud)|✅|
-| Web Interface (Streamlit) |   |
+| Web Interface (Streamlit) |✅|
 
 # Project Structure
 ```
