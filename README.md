@@ -51,6 +51,8 @@
 └── start.sh                        # Startup script for the project
 ```
 
+
+
 # Prepare
 1. Create a virtual environment
 ```bash

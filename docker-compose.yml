@@ -120,6 +120,7 @@ services:
       - "./.env:/app/.env"
     networks:
       - PrefectNetwork
+    profiles: ["streamlit"]
 
 volumes:
   prefect:

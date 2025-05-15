@@ -56,7 +56,7 @@ def load_to_lakefs(data: pd.DataFrame, lakefs_endpoint: str = None) -> None:
 @task(name="scrape tag")
 async def scrape_tag(category: str, tag: str, tag_url: str) -> list[dict]:
     try:
-        return await XScraping().scrape_all_tweet_texts(category=category, tag=tag, tag_url=tag_url, max_scrolls=50)
+        return await XScraping().scrape_all_tweet_texts(category=category, tag=tag, tag_url=tag_url, max_scrolls=2)
     except Exception as e:
         logger.error(f"[ERROR] Tag '{tag}' failed: {str(e)}")
         raise
