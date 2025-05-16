@@ -1,6 +1,10 @@
 config/auth/
 tmp/
-data/
+data/from_prefect
+data/lakefs
+data/postgres_data
+data/tweet_data_test.csv
+data/tweet_data.csv
 src/backend/config/
 
 # Byte-compiled / optimized / DLL files
