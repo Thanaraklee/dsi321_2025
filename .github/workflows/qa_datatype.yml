@@ -16,7 +16,7 @@ jobs:
 
             - name: Install dependencies
               run: |
-                  pip install pandas==2.2.3
+                  pip install pandas==2.2.3 pyarrow==20.0.0
 
             - name: Install editable package
               run: |
@@ -33,5 +33,5 @@ jobs:
                     print('Data has object columns.')
                     sys.exit(1)
                 print('Data has no object columns.')
-                ""
+                "
                   
