@@ -8,11 +8,11 @@
 # Dataset Quality
 | | |
 | - | :- |
-| Contains at least 1,000 records | |
-| Covers a full 24-hour time range | |
-| At least 90% data completeness | |
-| No columns with data type 'object' | |
-| No duplicate records | |
+| Contains at least 1,000 records | [![Quality Row](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/qa_row.yml/badge.svg)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/qa_row.yml) |
+| Covers a full 24-hour time range | [![Quality Cover 24-hour](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/qa_time.yml/badge.svg)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/qa_time.yml) |
+| At least 90% data completeness | [![Quality Missing](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/qa_missing.yml/badge.svg)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/qa_missing.yml) |
+| No columns with data type 'object' | [![Quality Data Type](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/qa_datatype.yml/badge.svg)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/qa_datatype.yml) |
+| No duplicate records | [![Quality Duplicate](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/qa_duplicate.yml/badge.svg)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/qa_duplicate.yml) |
 - dataset (`data/data.parquet`)
 # Overview
 This system was developed to Track and analyze public data related to Thammasat University in academic terms using real-time data extraction and natural language processing (NLP) techniques to:
