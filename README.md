@@ -5,6 +5,15 @@
 | Security | [![Bandit](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/bandit.yml/badge.svg?branch=main)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/bandit.yml) [![CodeQL](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/github-code-scanning/codeql) |
 | Dataset Validation | [![Validation](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/validation.yml/badge.svg)](https://github.com/Thanaraklee/dsi321_2025/actions/workflows/validation.yml) |
 
+# Dataset Quality
+| | |
+| - | :- |
+| Contains at least 1,000 records | |
+| Covers a full 24-hour time range | |
+| At least 90% data completeness | |
+| No columns with data type 'object' | |
+| No duplicate records | |
+- dataset (`data/data.parquet`)
 # Overview
 This system was developed to Track and analyze public data related to Thammasat University in academic terms using real-time data extraction and natural language processing (NLP) techniques to:
 - Check comments and articles mentioning TU
