@@ -1,0 +1,38 @@
+name: Quality Cover 24-hour
+on:
+    workflow_dispatch:
+
+jobs:
+    validation:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: '3.13'
+
+            - name: Install dependencies
+              run: |
+                  pip install pandas==2.2.3
+
+            - name: Install editable package
+              run: |
+                  pip install -e .
+
+            - name: Run validation script
+              run: |
+                python -c "
+                import sys
+                import pandas as pd
+                df = pd.read_parquet('data/data.parquet')
+                df['hour'] = df['timestamp'].dt.hour
+                unique_hours = sorted(df['hour'].dropna().unique())
+                if len(unique_hours) < 24:
+                    print('Data does not cover all 24 hours. Missing hours:', set(range(24)) - set(unique_hours))
+                    sys.exit(1)
+                print('Data covers all 24 hours')
+                ""
+                  

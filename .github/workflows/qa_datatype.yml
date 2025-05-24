@@ -1,0 +1,37 @@
+name: Quality Data Type
+on:
+    workflow_dispatch:
+
+jobs:
+    validation:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Set up Python
+              uses: actions/setup-python@v4
+              with:
+                  python-version: '3.13'
+
+            - name: Install dependencies
+              run: |
+                  pip install pandas==2.2.3
+
+            - name: Install editable package
+              run: |
+                  pip install -e .
+
+            - name: Run validation script
+              run: |
+                python -c "
+                import sys
+                import pandas as pd
+                df = pd.read_parquet('data/data.parquet')
+                object_columns = df.select_dtypes(include=['object']).columns
+                if len(object_columns) > 0:
+                    print('Data has object columns.')
+                    sys.exit(1)
+                print('Data has no object columns.')
+                ""
+                  
